@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+// This class creates database with 3 tables - Car, Company and Customer
 public class Database {
 
     private static String dbPath = "jdbc:h2:./src/database/";
@@ -15,6 +16,10 @@ public class Database {
         connection.setAutoCommit(true);
         return connection;
     }
+
+    // Initiate database - default database name is: newDB
+    // Custom name can be given in the command line arguments using "-databaseFileName" flag
+    // example: -databaseFileName customName
 
     public static void initDatabase(String[] args) throws SQLException {
         dbName = "newDB";
@@ -41,7 +46,7 @@ public class Database {
         String tableCarSQL = "CREATE TABLE IF NOT EXISTS CAR (" +
                 "ID INT PRIMARY KEY AUTO_INCREMENT, " +
                 "NAME VARCHAR(50) UNIQUE NOT NULL, " +
-                "COMPANY_ID INT NOT NULL REFERENCES COMPANY(ID) " + //adds foreign key referring to ID col of Company table
+                "COMPANY_ID INT NOT NULL REFERENCES COMPANY(ID) " + //adds foreign key referring to ID col of the Company table
                 ");"; // ??? - read from a DB?
         st.execute(tableCarSQL);
 

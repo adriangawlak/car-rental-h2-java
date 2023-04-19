@@ -28,6 +28,7 @@ public class UserInterface {
         mainMenu();
     }
 
+    // this shows main menu
     public void mainMenu() throws SQLException {
         boolean menuOn = true;
         while (menuOn) {
@@ -46,6 +47,7 @@ public class UserInterface {
         }
     }
 
+    // this shows manager menu
     private void managerMenu() throws SQLException {
         boolean managerOn = true;
         while (managerOn) {
@@ -69,7 +71,8 @@ public class UserInterface {
         }
     }
 
-    // print list of companies sorted by IDs, indexed from 1 or info that it's empty
+    // this prints list of companies sorted by IDs, indexed from 1 or info that the list is empty
+    // function returns company chosen from the list
     private Company companyList() throws SQLException {
         ArrayList<Company> companies = companyDAO.getAll();
         if (companies.isEmpty()) {
@@ -101,6 +104,7 @@ public class UserInterface {
         companyDAO.add(company);
     }
 
+    // this shows company menu
     private void companyMenu(Company company) throws SQLException {
         boolean companyOn = true;
         System.out.println("\n'" + company.getName() + "' company");
@@ -122,6 +126,7 @@ public class UserInterface {
         }
     }
 
+    // this shows main menu
     public HashMap<Integer, Car> carList(int companyId) throws SQLException {
         ArrayList<Car> cars = carDAO.getAll(companyId);
         HashMap<Integer, Car> carList;
@@ -149,6 +154,8 @@ public class UserInterface {
         Car car = new Car(carName, company);
         carDAO.add(car);
     }
+
+    // This shows list of customers saved in a database
     public void customerList() throws SQLException {
         ArrayList<Customer> customers = customerDAO.getAll();
         if (customers.isEmpty()) {
@@ -169,6 +176,7 @@ public class UserInterface {
         }
     }
 
+    // This shows customer menu
     public void customerMenu(Customer customer) throws SQLException {
         boolean menuOn = true;
         while (menuOn) {
@@ -199,13 +207,15 @@ public class UserInterface {
         customerDAO.add(customer);
     }
 
+    // This prints all rental companies and their available cars
+    // The function marks chosen car as rented in the database
     public void rentCar(Customer customer) throws SQLException {
         // -> print companies to choose (if empty company list print info) and return to customer menu
         // Check if the customer has rented a car
         if (customer.getRentedCarId() != null) {
             System.out.println("You've already rented a car!");
         } else {
-            // check if the customer pressed 0. Back
+            // check if the customer pressed "0. Back"
             Company chossenCompany = companyList();
             if (chossenCompany == null)
                 return;
@@ -219,15 +229,10 @@ public class UserInterface {
                     return;
                 Car chosenCar = (Car) availableCars.get(choice);
                 System.out.println("You rented '" + chosenCar.getName() + "'");
-//                chosenCar. - add column to database
                 customer.setRentedCarId(chosenCar.getId());
-//                carDAO.update(chosenCar); - add
                 customerDAO.updateCarId(customer);
-
             }
-
         }
-
     }
 
     public void returnCar(Customer customer) throws SQLException {
@@ -242,6 +247,7 @@ public class UserInterface {
 
     }
 
+    // This prints info about currently rented car
     public void showMyCar(Customer customer) throws SQLException {
         Integer carId = customer.getRentedCarId();
         if (carId == null)
@@ -256,5 +262,7 @@ public class UserInterface {
             System.out.println(companyName);
         }
     }
+
+
 
 }
