@@ -13,6 +13,7 @@ import org.legacy.customer.CustomerDAOImpl;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -36,13 +37,14 @@ public class UserInterface {
             System.out.println("2. Log in as a customer");
             System.out.println("3. Create a customer");
             System.out.println("0. Exit");
-            int choice = scan.nextInt();
+            int choice = scanDigit();
 
             switch (choice) {
                 case 1 -> managerMenu();
                 case 2 -> customerList();
                 case 3 -> createCustomer();
                 case 0 -> menuOn = false;
+                default -> System.out.println("Invalid input, please enter digit corresponding with your choice.");
             }
         }
     }
@@ -55,7 +57,7 @@ public class UserInterface {
             System.out.println("2. Create a company");
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scan.nextInt();
+            int choice = scanDigit();
 
             switch (choice) {
                 case 1 -> {
@@ -64,9 +66,8 @@ public class UserInterface {
                         companyMenu(company);
                 }
                 case 2 -> createCompany();
-                case 0 -> {
-                    managerOn = false;
-                }
+                case 0 -> managerOn = false;
+                default -> System.out.println("Invalid input, please enter digit corresponding with your choice.");
             }
         }
     }
@@ -79,13 +80,17 @@ public class UserInterface {
             System.out.println("The company list is empty!");
             return null;
         } else {
-            System.out.println("\nChoose a company:");
+            System.out.println("\nChoose a rental company:");
             companies.forEach(System.out::println);
             System.out.println("0. Back");
             System.out.print("> ");
 
-            int choice = scan.nextInt();
+            int choice = scanDigit();
             Company chosenCompany;
+            while (choice < 0 || choice > companies.size()) {
+                System.out.println("Please enter a number corresponding with a company from the list.");
+                choice = scanDigit();
+            }
             if (choice == 0)
                 return null;
             else {
@@ -113,7 +118,8 @@ public class UserInterface {
             System.out.println("2. Create a car");
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scan.nextInt();
+            int choice = scanDigit();
+
             switch (choice) {
                 case 1 -> {
                     HashMap availableCars = carList(company.getId());
@@ -122,6 +128,7 @@ public class UserInterface {
                 }
                 case 2 -> createCar(company);
                 case 0 -> companyOn = false;
+                default -> System.out.println("Invalid input, please enter digit corresponding with your choice.");
             }
         }
     }
@@ -133,9 +140,10 @@ public class UserInterface {
         if (cars.isEmpty()) {
             return null;
         } else {
-            System.out.println("\nCar list:");
+            System.out.println("\nThese cars are available:");
             int count = 1;
             carList = new HashMap<>();
+            // This keeps numbers in order, starting from 1
             for (Car car : cars) {
                 carList.put(count, car);
                 System.out.println(count++ + ". " + car.getName());
@@ -161,7 +169,7 @@ public class UserInterface {
         if (customers.isEmpty()) {
             System.out.println("The customer list is empty!");
         } else {
-            System.out.println("\nCustomer list:");
+            System.out.println("\nChoose a customer account by typing a number and press enter");
             customers.forEach(System.out::println);
             System.out.println("0. Back");
             System.out.print("> ");
@@ -185,7 +193,8 @@ public class UserInterface {
             System.out.println("3. My rented car");
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scan.nextInt();
+            int choice = scanDigit();
+
             switch (choice) {
                 case 1 -> rentCar(customer);
                 case 2 -> returnCar(customer);
@@ -193,6 +202,7 @@ public class UserInterface {
                 case 0 -> {
                     return;
                 }
+                default -> System.out.println("Invalid input, please enter a digit corresponding with your choice.");
             }
         }
 
@@ -224,7 +234,8 @@ public class UserInterface {
                 System.out.println("No available cars in the " + chossenCompany.getName() + " company.");
             } else {
                 System.out.print("> ");
-                int choice = scan.nextInt();
+//                int choice = scan.nextInt();
+                int choice = scanDigit();
                 if (choice == 0)
                     return;
                 Car chosenCar = (Car) availableCars.get(choice);
@@ -263,6 +274,21 @@ public class UserInterface {
         }
     }
 
+    // This takes input that needs to be a single digit, else prints a message
+    public int scanDigit() {
+        int choice = 0;
+        boolean validInput = false;
+        while (!validInput) {
+            try {
+                choice = scan.nextInt();
+                validInput = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input, please enter digit corresponding with your choice.");
+                scan.next();
+            }
+        }
+        return choice;
+    }
 
 
 }
