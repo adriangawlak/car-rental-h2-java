@@ -10,7 +10,7 @@ public interface CompanyDAO extends DAO<Company> {
     Company get(int id) throws SQLException;
     ArrayList<Company> getAll() throws SQLException;
     int add(Company company) throws SQLException;
-    int updateCarId(Company company) throws SQLException;
+    int update(Company company) throws SQLException;
     int delete(Company company) throws SQLException;
 
 }

@@ -31,8 +31,9 @@ public class CustomerDAOImpl implements CustomerDAO{
             }
         } catch (SQLException e) {
             System.out.println("Something went wrong during printing allCustomers");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return allCustomers;
     }
 
@@ -40,25 +41,68 @@ public class CustomerDAOImpl implements CustomerDAO{
     public int add(Customer customer) throws SQLException {
         Connection connection = Database.getConnection();
         try {
+            if (nameExists(customer))
+                return 1;
             String insertCustomerSQL = "INSERT INTO CUSTOMER (NAME) " +
                     "VALUES (?);";
             PreparedStatement ps = connection.prepareStatement(insertCustomerSQL);
             ps.setString(1, customer.getName());
-//            ps.setInt(2, customer.getRentedCarId());
             ps.executeUpdate();
             System.out.println("The customer was added!");
         } catch (SQLException e) {
-            System.out.println("Something went wrong during adding a customer.");
+            System.out.println("Something went wrong during adding a customer. Please try another name.");
+        } finally {
+            connection.close();
         }
         return 0;
+    }
+
+    public int update(Customer customer) throws SQLException {
+        Connection connection = Database.getConnection();
+        try {
+            boolean customerExists = nameExists(customer);
+            if (customerExists)
+                return 1;
+            String updateCustomerSQL = "UPDATE CUSTOMER SET NAME = ? WHERE ID = ?;";
+            PreparedStatement ps = connection.prepareStatement(updateCustomerSQL);
+            ps.setString(1, customer.getName());
+            ps.setInt(2, customer.getId());
+            ps.executeUpdate();
+            System.out.println("Customer data successfully updated");
+        } catch (SQLException e) {
+            connection.rollback();
+            System.out.println("There was an error during customer data update.");
+        } finally {
+            connection.close();
+        }
+        return 0;
+    }
+
+    public boolean nameExists(Customer customer) throws SQLException {
+        Connection connection = Database.getConnection();
+        try {
+            String checkNameSQL = "SELECT ID FROM CUSTOMER WHERE NAME = ?;";
+            PreparedStatement ps = connection.prepareStatement(checkNameSQL);
+            ps.setString(1, customer.getName());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                System.out.println("This customer name already exists, please try another name");
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println();
+        } finally {
+            connection.close();
+        }
+        return false;
     }
 
     @Override
     public int updateCarId(Customer customer) throws SQLException {
         Connection connection = Database.getConnection();
         try {
-            String updateCustomerSQL = "UPDATE CUSTOMER SET RENTED_CAR_ID = ? WHERE ID = ?;";
-            PreparedStatement ps = connection.prepareStatement(updateCustomerSQL);
+            String updateCarIdSQL = "UPDATE CUSTOMER SET RENTED_CAR_ID = ? WHERE ID = ?;";
+            PreparedStatement ps = connection.prepareStatement(updateCarIdSQL);
             if (customer.getRentedCarId() == null)
                 ps.setNull(1, java.sql.Types.INTEGER);
             else
@@ -67,6 +111,8 @@ public class CustomerDAOImpl implements CustomerDAO{
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println("There was a error during updating rentedCarId");
+        } finally {
+            connection.close();
         }
         return 0; // Update customer table, SET RENTED_CAR_ID to null;
     }

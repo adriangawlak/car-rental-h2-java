@@ -17,15 +17,16 @@ public class Database {
         return connection;
     }
 
-    // Initiate database - default database name is: newDB
-    // Custom name can be given in the command line arguments using "-databaseFileName" flag
-    // example: -databaseFileName customName
+    // Initiate database - default database name is: newDb
+    // Custom name can be given in the command line arguments using "-databaseName" flag.
+    // example: -databaseName customName
+    // New database with your custom name will be created.
 
     public static void initDatabase(String[] args) throws SQLException {
-        dbName = "newDB";
+        dbName = "newDb";
 
         if (args.length > 0) {
-            if (args[0].equals("-databaseFileName")) {
+            if (args[0].equals("-databaseName")) {
                 dbName = args[1];
             }
         }
@@ -46,7 +47,7 @@ public class Database {
         String tableCarSQL = "CREATE TABLE IF NOT EXISTS CAR (" +
                 "ID INT PRIMARY KEY AUTO_INCREMENT, " +
                 "NAME VARCHAR(50) UNIQUE NOT NULL, " +
-                "COMPANY_ID INT NOT NULL REFERENCES COMPANY(ID) " + //adds foreign key referring to ID col of the Company table
+                "COMPANY_ID INT NOT NULL REFERENCES COMPANY(ID) ON DELETE CASCADE" + //adds foreign key referring to ID col of the Company table
                 ");"; // ??? - read from a DB?
         st.execute(tableCarSQL);
 
@@ -61,6 +62,5 @@ public class Database {
         connection.close();
 
     }
-
 
 }

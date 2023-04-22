@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="carRentalJDBC:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/carRentalJDBC_jar</output-path>
+    <root id="archive" name="carRentalJDBC.jar">
+      <element id="module-output" name="carRentalJDBC" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/h2database/h2/2.1.214/h2-2.1.214.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

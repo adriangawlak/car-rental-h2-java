@@ -25,13 +25,14 @@ public class CarDAOImpl implements CarDAO {
             }
         } catch (SQLException e) {
             System.out.println("Something went wrong during checking a car in the database.");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return car;
     }
 
     @Override
-    public ArrayList<Car> getAll(int companyId) throws SQLException {
+    public ArrayList<Car> getAll(int companyId, boolean showAvailable) throws SQLException {
         Connection connection = Database.getConnection();
         ArrayList<Car> allCars = new ArrayList<>();
 
@@ -49,14 +50,19 @@ public class CarDAOImpl implements CarDAO {
                 String name = rs.getString("NAME");
                 int compId = rs.getInt("COMPANY_ID");
                 Car car = new Car(id, name, compId);
-                boolean available = this.isAvailable(car);
-                if (available)
+                if (showAvailable) {
+                    boolean available = this.isAvailable(car);
+                    if (available)
+                        allCars.add(car);
+                } else {
                     allCars.add(car);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Something went wrong during printing allCars list.");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return allCars;
     }
 
@@ -72,9 +78,10 @@ public class CarDAOImpl implements CarDAO {
             ps.executeUpdate();
             System.out.println("The car was added!\n");
         } catch (SQLException e) {
-            System.out.println("\nSomething went wrong during adding a car.");
+            System.out.println("\nSomething went wrong during adding a car.\n");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return 0;
     }
 
@@ -85,6 +92,18 @@ public class CarDAOImpl implements CarDAO {
 
     @Override
     public int delete(Car car) throws SQLException {
+        Connection connection = Database.getConnection();
+        try {
+            String deleteCarSQL = "DELETE FROM CAR " +
+                    "WHERE ID = " + car.getId() + ";";
+            PreparedStatement ps = connection.prepareStatement(deleteCarSQL);
+            ps.executeUpdate();
+            System.out.println("The car was deleted!\n");
+        } catch (SQLException e) {
+            System.out.println("Something went wrong during deleting a car from the database\n");
+        } finally {
+            connection.close();
+        }
         return 0;
     }
 
@@ -98,15 +117,13 @@ public class CarDAOImpl implements CarDAO {
             ps.setInt(1, car.getId());
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-//                System.out.println("The car " + car.getName() + " is rented out");
                 availability = false;
             }
-//            else
-//                System.out.println("The car " + car.getName() + " is available");
         } catch (SQLException e) {
             System.out.println("Something went wrong during checking the database");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return availability;
     }
 }

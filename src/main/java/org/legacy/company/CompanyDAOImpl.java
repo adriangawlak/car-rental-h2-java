@@ -21,8 +21,9 @@ public class CompanyDAOImpl implements CompanyDAO{
             }
         } catch (SQLException e) {
             System.out.println("Something went wrong during checking the company in the database.");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return company;
     }
 
@@ -43,8 +44,9 @@ public class CompanyDAOImpl implements CompanyDAO{
             }
         } catch (SQLException e) {
             System.out.println("Something went wrong during printing the allCompanies list.");
+        } finally {
+            connection.close();
         }
-        connection.close();
         return allCompanies;
     }
 
@@ -60,18 +62,32 @@ public class CompanyDAOImpl implements CompanyDAO{
             System.out.println("The company was created!");
         } catch (SQLException e) {
             System.out.println("Something went wrong during adding a company to a database");
+        } finally {
             connection.close();
         }
         return 0;
     }
 
     @Override
-    public int updateCarId(Company company) throws SQLException {
+    public int update(Company company) throws SQLException {
         return 0;
     }
 
     @Override
     public int delete(Company company) throws SQLException {
+        Connection connection = Database.getConnection();
+        try {
+            String insertCompanySQL = "DELETE FROM COMPANY " +
+                    "WHERE ID = " + company.getId() + ";";
+            PreparedStatement ps = connection.prepareStatement(insertCompanySQL);
+            ps.executeUpdate();
+            System.out.println("The company was deleted!");
+        } catch (SQLException e) {
+            System.out.println("\nSomething went wrong during deleting a company from the database.");
+            System.out.println("Collect all rented cars and try again.");
+        } finally {
+            connection.close();
+        }
         return 0;
     }
 

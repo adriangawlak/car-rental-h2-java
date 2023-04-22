@@ -9,6 +9,7 @@ public interface CustomerDAO extends DAO<Customer> {
     Customer get(int id) throws SQLException;
     ArrayList<Customer> getAll() throws SQLException;
     int add(Customer customer) throws SQLException;
+    int update(Customer customer) throws SQLException;
     int updateCarId(Customer customer) throws SQLException;
     int delete(Customer customer) throws SQLException;
 }

@@ -31,20 +31,23 @@ public class UserInterface {
 
     // this shows main menu
     public void mainMenu() throws SQLException {
+        System.out.println("\nWelcome to Car Rental System!");
         boolean menuOn = true;
         while (menuOn) {
-            System.out.println("\n1. Log in as a manager");
+            System.out.println("\nChoose menu by typing a number and press enter");
+            System.out.println("1. Log in as a manager");
             System.out.println("2. Log in as a customer");
             System.out.println("3. Create a customer");
             System.out.println("0. Exit");
-            int choice = scanDigit();
+            System.out.print("> ");
+            int choice = scanNumber();
 
             switch (choice) {
                 case 1 -> managerMenu();
-                case 2 -> customerList();
+                case 2 -> chooseCustomer();
                 case 3 -> createCustomer();
                 case 0 -> menuOn = false;
-                default -> System.out.println("Invalid input, please enter digit corresponding with your choice.");
+                default -> System.out.println("Invalid input, please enter a number corresponding with your choice");
             }
         }
     }
@@ -55,53 +58,62 @@ public class UserInterface {
         while (managerOn) {
             System.out.println("\n1. Company list");
             System.out.println("2. Create a company");
+            System.out.println("3. Delete a company");
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scanDigit();
+            int choice = scanNumber();
 
             switch (choice) {
                 case 1 -> {
-                    Company company = companyList();
+                    Company company = chooseCompany();
                     if (company != null)
                         companyMenu(company);
                 }
                 case 2 -> createCompany();
+                case 3 -> deleteCompany();
                 case 0 -> managerOn = false;
-                default -> System.out.println("Invalid input, please enter digit corresponding with your choice.");
+                default -> System.out.println("Invalid input, please enter digit corresponding with your choice");
             }
         }
     }
 
     // this prints list of companies sorted by IDs, indexed from 1 or info that the list is empty
     // function returns company chosen from the list
-    private Company companyList() throws SQLException {
+    private Company chooseCompany() throws SQLException {
         ArrayList<Company> companies = companyDAO.getAll();
+        HashMap<Integer, Company> companiesList;
         if (companies.isEmpty()) {
             System.out.println("The company list is empty!");
             return null;
         } else {
             System.out.println("\nChoose a rental company:");
-            companies.forEach(System.out::println);
+//            HashMap keeps list in order, independent of companyId in the database.
+            int listCount = 1;
+            companiesList = new HashMap<>();
+            for (Company company : companies) {
+                companiesList.put(listCount, company);
+                System.out.println(listCount++ + ". " + company.getName());
+            }
             System.out.println("0. Back");
             System.out.print("> ");
 
-            int choice = scanDigit();
+            int choice = scanNumber();
             Company chosenCompany;
-            while (choice < 0 || choice > companies.size()) {
+            while (choice < 0 || choice > companiesList.size()) {
                 System.out.println("Please enter a number corresponding with a company from the list.");
-                choice = scanDigit();
+                choice = scanNumber();
             }
             if (choice == 0)
                 return null;
             else {
-                chosenCompany = companies.get(choice - 1);
+                chosenCompany = companiesList.get(choice);
                 return chosenCompany;
             }
         }
     }
 
     private void createCompany() throws SQLException {
-        System.out.println("Enter the company name:");
+        System.out.println("Enter company name:");
         System.out.print("> ");
         scan.nextLine();
         String companyName = scan.nextLine();
@@ -116,42 +128,75 @@ public class UserInterface {
         while (companyOn) {
             System.out.println("1. Car list");
             System.out.println("2. Create a car");
+            System.out.println("3. Delete a car");
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scanDigit();
+            int choice = scanNumber();
 
             switch (choice) {
                 case 1 -> {
-                    HashMap availableCars = carList(company.getId());
-                    if (availableCars == null)
-                        System.out.println("The car list is empty!\n");
+                    Car car = chooseCar(company.getId(), false);
+                    if (car != null)
+                        System.out.println(car.toString() + "\n");
                 }
                 case 2 -> createCar(company);
+                case 3 -> deleteCar(company);
                 case 0 -> companyOn = false;
                 default -> System.out.println("Invalid input, please enter digit corresponding with your choice.");
             }
         }
     }
 
-    // this shows main menu
-    public HashMap<Integer, Car> carList(int companyId) throws SQLException {
-        ArrayList<Car> cars = carDAO.getAll(companyId);
-        HashMap<Integer, Car> carList;
+    private void deleteCompany() throws SQLException {
+        String message = companyDAO.getAll().isEmpty()
+                ? "\nNo companies to delete." : "\nEnter a number and press enter to delete";
+        System.out.println(message);
+        Company company = chooseCompany();
+        if (company != null) {
+            System.out.println("Are you sure you want to delete the company " + company.getName() + " with all its cars?");
+            System.out.println("Type \"y\" or \"yes\" to confirm. To cancel type \"n\" or \"no\"");
+            String confirmation = scan.next().toLowerCase();
+            if (confirmation.equals("yes") || confirmation.equals("y"))
+                companyDAO.delete(company);
+            else
+                System.out.println("Deleting canceled, please try again.");
+        }
+    }
+
+    // this prints list of available cars and returns a chosen car
+    public Car chooseCar(int companyId, boolean showAvailable) throws SQLException {
+        ArrayList<Car> cars = carDAO.getAll(companyId, showAvailable);
+        HashMap<Integer, Car> carsList;
+        String message = showAvailable ? "List of currently available cars:" : "List of all cars in the company:";
         if (cars.isEmpty()) {
+            System.out.println("\nNo registered cars in the chosen company.\n");
             return null;
         } else {
-            System.out.println("\nThese cars are available:");
+            System.out.println("\n" + message);
             int count = 1;
-            carList = new HashMap<>();
-            // This keeps numbers in order, starting from 1
+            carsList = new HashMap<>();
+            // This keeps numbers in order, starting from 1, since ID in the DB isn't ordered
             for (Car car : cars) {
-                carList.put(count, car);
+                carsList.put(count, car);
                 System.out.println(count++ + ". " + car.getName());
             }
             System.out.println("0. Back");
-            System.out.println();
+            System.out.print("> ");
+            int choice = scanNumber();
+            Car chosenCar;
+            while (choice < 0 || choice > carsList.size()) {
+                System.out.println("Please enter a number corresponding with a car from the list");
+                System.out.print("> ");
+                choice = scanNumber();
+            }
+            if (choice == 0) {
+                System.out.println();
+                return null;
+            } else {
+                chosenCar = carsList.get(choice);
+                return chosenCar;
+            }
         }
-        return carList;
     }
 
     public void createCar(Company company) throws SQLException {
@@ -163,20 +208,42 @@ public class UserInterface {
         carDAO.add(car);
     }
 
+    private void deleteCar(Company company) throws SQLException {
+        Car car = null;
+        if (!carDAO.getAll(company.getId(), true).isEmpty()) {
+            System.out.println("\nEnter a number of the car that you want to delete");
+            car = chooseCar(company.getId(), true);
+        }
+        if (car != null) {
+//            int choice = scanDigit();
+            System.out.println("Are you sure you want to delete the car " + car.getName() + "?");
+            System.out.println("Type \"y\" or \"yes\" to confirm, to cancel type \"n\" or \"no\"");
+            System.out.print("> ");
+            String confirmation = scan.next().toLowerCase();
+            if (confirmation.equals("yes") || confirmation.equals("y"))
+                carDAO.delete(car);
+            else
+                System.out.println("\nDeleting canceled, please try again.\n");
+        } else
+            System.out.println("\nThere are no cars to delete!\n");
+    }
+
     // This shows list of customers saved in a database
-    public void customerList() throws SQLException {
+    public void chooseCustomer() throws SQLException {
         ArrayList<Customer> customers = customerDAO.getAll();
         if (customers.isEmpty()) {
-            System.out.println("The customer list is empty!");
+            System.out.println("\nThe customer list is empty. Create a customer account to log in.");
         } else {
             System.out.println("\nChoose a customer account by typing a number and press enter");
             customers.forEach(System.out::println);
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scan.nextInt();
+            int choice = scanNumber();
             Customer chosenCustomer;
             if (choice == 0)
                 return;
+            else if (choice < 0 || choice > customers.size())
+                System.out.println("Wrong number, please try again.");
             else {
                 chosenCustomer = customers.get(choice - 1);
                 customerMenu(chosenCustomer);
@@ -188,57 +255,62 @@ public class UserInterface {
     public void customerMenu(Customer customer) throws SQLException {
         boolean menuOn = true;
         while (menuOn) {
-            System.out.println("\n1. Rent a car");
+            System.out.println("\nWelcome " + customer.getName());
+            System.out.println("1. Rent a car");
             System.out.println("2. Return a rented car");
             System.out.println("3. My rented car");
+            System.out.println("4. Change customer data");
             System.out.println("0. Back");
             System.out.print("> ");
-            int choice = scanDigit();
+            int choice = scanNumber();
 
             switch (choice) {
                 case 1 -> rentCar(customer);
                 case 2 -> returnCar(customer);
                 case 3 -> showMyCar(customer);
+                case 4 -> changeCustomerData(customer);
                 case 0 -> {
                     return;
                 }
-                default -> System.out.println("Invalid input, please enter a digit corresponding with your choice.");
+                default -> System.out.println("Invalid input, please enter a number corresponding with your choice.");
             }
         }
 
     }
 
     public void createCustomer() throws SQLException {
-        System.out.println("\nEnter the customer name:");
+        System.out.println("\nEnter customer name:");
         System.out.print("> ");
         scan.nextLine();
         String customerName = scan.nextLine();
-        Customer customer = new Customer(customerName);
-        customerDAO.add(customer);
+        System.out.println("Do you want to save the customer '" + customerName + "'?");
+        System.out.println("Type \"y\" or \"yes\" to save. Type \"n\" or \"no\" to cancel");
+        String confirmation = scan.nextLine().toLowerCase();
+        if (confirmation.equals("y") || confirmation.equals("yes")) {
+            Customer customer = new Customer(customerName);
+            customerDAO.add(customer);
+        } else {
+            System.out.println("Saving canceled");
+        }
     }
 
     // This prints all rental companies and their available cars
     // The function marks chosen car as rented in the database
     public void rentCar(Customer customer) throws SQLException {
-        // -> print companies to choose (if empty company list print info) and return to customer menu
-        // Check if the customer has rented a car
+        // -> print companies to choose (if empty company list print info and return to customer menu)
+        // Check if the customer has rented a car, only one rental allowed
         if (customer.getRentedCarId() != null) {
             System.out.println("You've already rented a car!");
         } else {
             // check if the customer pressed "0. Back"
-            Company chossenCompany = companyList();
-            if (chossenCompany == null)
+            Company chosenCompany = chooseCompany();
+            if (chosenCompany == null)
                 return;
-            HashMap availableCars = carList(chossenCompany.getId());
-            if (availableCars == null) {
-                System.out.println("No available cars in the " + chossenCompany.getName() + " company.");
+            Car chosenCar = chooseCar(chosenCompany.getId(), true);
+            // check if the customer typed a correct number
+            if (chosenCar == null) {
+                return;
             } else {
-                System.out.print("> ");
-//                int choice = scan.nextInt();
-                int choice = scanDigit();
-                if (choice == 0)
-                    return;
-                Car chosenCar = (Car) availableCars.get(choice);
                 System.out.println("You rented '" + chosenCar.getName() + "'");
                 customer.setRentedCarId(chosenCar.getId());
                 customerDAO.updateCarId(customer);
@@ -274,8 +346,21 @@ public class UserInterface {
         }
     }
 
-    // This takes input that needs to be a single digit, else prints a message
-    public int scanDigit() {
+    private void changeCustomerData(Customer customer) throws SQLException {
+        System.out.println("Enter new customer name:");
+        System.out.print("> ");
+        scan.nextLine();
+        String newName = scan.nextLine();
+        String previousName = customer.getName();
+        customer.setName(newName);
+        int result = customerDAO.update(customer);
+        // revert a name change in case of an error
+        if (result == 1)
+            customer.setName(previousName);
+    }
+
+    // This takes input that needs to be a number and returns it, else a message is printed for incorrect input
+    public int scanNumber() {
         int choice = 0;
         boolean validInput = false;
         while (!validInput) {
@@ -283,7 +368,7 @@ public class UserInterface {
                 choice = scan.nextInt();
                 validInput = true;
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input, please enter digit corresponding with your choice.");
+                System.out.println("Invalid input, please enter a number corresponding with your choice");
                 scan.next();
             }
         }
