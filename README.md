@@ -2,7 +2,7 @@
 This is a Java application for managing car rental companies and their customers.  
 It provides a simple interface for adding and updating companies, cars, and customers, as well as renting and returning cars.  
 All operations are stored in a database. You can simply start using the program and it will create an empty database.  
-This application uses Java with manually configured JDBC requests and SQL statements.
+This application uses Java with manually configured JDBC requests, SQL statements and embedded H2 database.
 
 
 ### Sample Database
@@ -18,7 +18,7 @@ depending on how do you want to run the application.
 ### In an IDE
 You can run the application in an IDE such as IntelliJ IDEA or Eclipse by running the `Main` class. 
 Once the application is running, you will be presented with a menu of options that allow you to interact with the application.  
-Don't forget to pass "-databaseName sampleDb" as command line arguments if you want to use a sample database.
+Don't forget to pass "-databaseName sampleDb" as CLI arguments if you want to use a sample database.
 
 
 ### On the Command Line
