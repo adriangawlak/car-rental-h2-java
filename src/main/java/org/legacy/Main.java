@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 // The prepopulated database name is: sampleDb
-// You can use it by passing "-databaseName sampleDb" as command line arguments
+// You can use it by passing "-databaseName sampleDb" as CLI arguments
 
 public class Main {
     public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
