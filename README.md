@@ -2,7 +2,9 @@
 This is a Java application for managing car rental companies with their cars and customers.  
 It provides a simple interface for adding and updating companies, cars, and customers, as well as renting and returning cars.  
 All operations are stored in a database. You can simply start using the program and it will create an empty database.  
-This application uses Java with manually configured JDBC requests, SQL statements and embedded H2 database.
+
+The program uses Java with manually configured JDBC requests, SQL statements and embedded H2 database.  
+Since there are few types of objects that use the database, they are structured with DAO design pattern.
 
 
 ### Sample Database
